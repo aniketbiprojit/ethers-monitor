@@ -12,11 +12,11 @@ export class Sync {
 	private static async addContracts(contracts: ContractConfigData[]) {
 		for (let index = 0; index < contracts.length; index++) {
 			const contract = await ContractFunctions.add(contracts[index])
-			Log.info(`Adding or added: ${contract.name}(${contract.uid})`)
-			Log.debug("Events found:")
+			Log.info(`Adding: `, { name: contract.name, uid: contract.uid })
+			Log.info("Events found:")
 			for (let index = 0; index < contract.abi.length; index++) {
 				const element = contract.abi[index]
-				Log.debug(element.name)
+				Log.info({ Event: element.name, Inputs: element.inputs })
 			}
 		}
 	}
