@@ -1,29 +1,28 @@
 import "../loadEnv"
-import { Log, LogLevelEnum } from "./utils/Logger"
+import { Log, LogLevelEnum } from "../utils/Logger"
 import { join } from "path"
-import { getListOfContracts, filterABIForEvents } from "./utils/contracts"
-import { getConfig } from "./utils/getConfig"
-import { MongoContainer } from "./utils/mongo"
+import { getListOfContracts, filterABIForEvents } from "../utils/contracts"
+import { getConfig } from "../utils/getConfig"
+import { MongoContainer } from "../utils/mongo"
+import { ExpressConfig } from "../app/ExpressConfig"
 
-const main = async () => {
-	Log.logLevel = LogLevelEnum.info
+class Initialize {
+	static async init() {
+		Log.logLevel = LogLevelEnum.info
 
-	await MongoContainer.init(process.env.MONGO_HOST as string, process.env.MONGO_DB as string)
+		await MongoContainer.init(process.env.MONGO_HOST as string, process.env.MONGO_DB as string)
 
-	const configFile = join(__dirname, "..", "config.json")
-	let config = await getConfig(configFile)
-	let contractsDir = config.contracts
+		const configFile = join(__dirname, "..", "config.json")
+		let config = await getConfig(configFile)
+		let contractsDir = config.contracts
 
-	const contracts = await getListOfContracts(contractsDir)
-	const filteredAbi = filterABIForEvents(contracts)
-	Log.info(filteredAbi.map((elem) => ({ name: elem.name, chainId: elem.chainId })))
+		const contracts = await getListOfContracts(contractsDir)
+		const filteredAbi = filterABIForEvents(contracts)
+
+		Log.info(filteredAbi.map((elem) => ({ name: elem.name, chainId: elem.chainId })))
+		const port = (process.env.PORT as string) || 8080
+		new ExpressConfig(port)
+	}
 }
 
-main()
-	.then(() => {
-		process.exit(0)
-	})
-	.catch((error) => {
-		Log.error(error)
-		process.exit(1)
-	})
+Initialize.init()
