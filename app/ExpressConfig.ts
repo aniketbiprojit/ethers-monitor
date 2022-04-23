@@ -19,9 +19,19 @@ export class ExpressConfig {
 		this.app.use(express.json())
 	}
 
-	init() {
-		this.app.listen(this.port, () => {
-			Log.info(`Listening on port ${this.port}`)
+	setupControllers() {
+		this.app.get("/", (_, res) => {
+			res.send("Hello World!")
 		})
+	}
+
+	init() {
+		try {
+			this.app.listen(this.port, () => {
+				Log.info(`Listening on port ${this.port}`)
+			})
+		} catch (err) {
+			console.error(err)
+		}
 	}
 }

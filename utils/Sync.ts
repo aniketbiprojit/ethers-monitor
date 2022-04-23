@@ -92,7 +92,13 @@ export class Sync {
 
 		const r: any = {}
 		event.inputs.forEach((elem) => {
-			r[elem.name] = String
+			if (elem.type === "tuple") {
+				const k: any = {}
+				elem.components?.forEach((tuple_inner) => {
+					k[tuple_inner.name] = String
+				})
+				r[elem.name] = k
+			} else r[elem.name] = String
 		})
 		const collection = new mongoose.Schema(
 			{

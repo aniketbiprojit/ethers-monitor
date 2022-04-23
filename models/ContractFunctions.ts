@@ -24,6 +24,13 @@ export class ContractFunctions {
 			)
 		} else {
 			contractInstance.rpcURL = contractData.rpcURL
+			const abi = contractInstance.abi
+			contractData.abi
+				.filter((elem) => !abi.find((e) => e.name === elem.name))
+				.map((newEvent) => {
+					contractInstance.abi.push(newEvent)
+				})
+			await contractInstance.save()
 		}
 		return contractInstance
 	}

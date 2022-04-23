@@ -25,7 +25,7 @@ export class ContractRepository {
 		{
 			type: string
 			name: string
-			inputs: Array<{ name: string; type: string; indexed: boolean }>
+			inputs: Array<{ name: string; type: string; indexed: boolean; components?: any[] }>
 			indexedTill?: number
 		} & Record<string, any>
 	>
