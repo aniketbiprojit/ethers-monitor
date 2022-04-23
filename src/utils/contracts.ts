@@ -1,6 +1,7 @@
 import { ethers } from "ethers"
 import { readdirSync } from "fs"
 import { isAbsolute, join } from "path"
+import { Log } from "./Logger"
 import { getChainId, getProvider, ProviderContainer } from "./provider"
 
 type ContractConfigData = {
@@ -40,23 +41,23 @@ export const getListOfContracts = async (contractsDir: string) => {
 						try {
 							importedData.chainId = await ProviderContainer.defaultChainId()
 						} catch (err) {
-							console.error(err)
-							console.error("Failed to load chain id for contract(default provider): " + importedData.name)
+							Log.error(err)
+							Log.error("Failed to load chain id for contract(default provider): " + importedData.name)
 						}
 					} else {
 						importedData.provider = getProvider(importedData.provider)
 						try {
 							importedData.chainId = await getChainId(importedData.provider)
 						} catch (err) {
-							console.error(err)
-							console.error("Failed to load chain id for contract(custom provider): " + importedData.name)
+							Log.error(err)
+							Log.error("Failed to load chain id for contract(custom provider): " + importedData.name)
 						}
 					}
 					if (importedData.startBlock) {
 						try {
 							importedData.startBlock = parseInt(importedData?.startBlock?.toString())
 						} catch (err) {
-							console.error("Failed to parse startBlock")
+							Log.error("Failed to parse startBlock")
 							importedData.startBlock = 0
 						}
 					} else {
