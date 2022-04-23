@@ -22,9 +22,9 @@ export class Sync {
 		}
 	}
 
-	private static async indexContract(contract: ContractRepository) {
+	private static async indexContract(contract: ContractRepository, _latestBlock?: number) {
 		const contractInstance = new ethers.Contract(contract.address, contract.abi, getProvider(contract.rpcURL))
-		const latestBlock = await contractInstance.provider.getBlockNumber()
+		const latestBlock = _latestBlock || (await contractInstance.provider.getBlockNumber())
 		for (let index = 0; index < contract.abi.length; index++) {
 			const { model, EventCollectionName, event } = Sync.getCollection(contract, index)
 			const fetchedData = await model.find().sort({ blockNumber: -1 }).limit(1)
@@ -41,11 +41,12 @@ export class Sync {
 			if (contract.startBlock > block) {
 				block = contract.startBlock
 			}
-			Log.info({ EventCollectionName, block, latestBlock })
-			const batchSize = 2000
+			Log.info({ name: contract.name, EventCollectionName, block, latestBlock })
+			const batchSize = 10_000
 			if (latestBlock - block > batchSize) {
 				let initialBlock = block
 				Log.info(`Started indexing:`, { name: contract.name, uid: contract.uid, event: event.name })
+
 				while (initialBlock + batchSize < latestBlock) {
 					try {
 						const queryData = await contractInstance.queryFilter(
@@ -61,13 +62,13 @@ export class Sync {
 								{ upsert: true, new: true }
 							)
 						}
-						Log.info({ EventCollectionName, initialBlock, latestBlock })
+						Log.info({ EventCollectionName, initialBlock, latestBlock, blockDiff: latestBlock - initialBlock })
 						initialBlock += batchSize
 
 						await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: initialBlock })
 					} catch (err) {
 						console.error(err)
-						this.indexContract(contract)
+						this.indexContract(contract, latestBlock)
 						return
 					}
 				}
@@ -103,7 +104,8 @@ export class Sync {
 				collection: EventCollectionName,
 			}
 		)
-		let model = mongoose.model(EventCollectionName, collection, EventCollectionName)
+		let model =
+			mongoose.models[EventCollectionName] || mongoose.model(EventCollectionName, collection, EventCollectionName)
 
 		return { collection, model, EventCollectionName, event }
 	}

@@ -22,6 +22,8 @@ export class ContractFunctions {
 				{ $set: { ...contract, abi: contract.abi } },
 				{ upsert: true, new: true }
 			)
+		} else {
+			contractInstance.rpcURL = contractData.rpcURL
 		}
 		return contractInstance
 	}
