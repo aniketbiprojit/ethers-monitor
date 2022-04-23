@@ -56,9 +56,20 @@ export class Sync {
 						)
 						for (let index = 0; index < queryData.length; index++) {
 							const query = queryData[index]
+							const m: any = { ...query, ...query.args }
+							event.inputs
+								.filter((elem) => elem.type === "tuple")
+								.forEach((elem) => {
+									let fin: any = {}
+									let temp = (query as any).args[elem.name]
+									Object.keys(temp).forEach((key) => {
+										fin[key] = (query as any).args[elem.name][key]
+									})
+									m[elem.name] = fin
+								})
 							await model.findOneAndUpdate(
 								{ transactionHash: query.transactionHash },
-								{ $set: { ...query, ...query.args } },
+								{ $set: m },
 								{ upsert: true, new: true }
 							)
 						}
@@ -76,7 +87,18 @@ export class Sync {
 				const queryData = await contractInstance.queryFilter(contractInstance.filters[event.name](), block, latestBlock)
 				for (let index = 0; index < queryData.length; index++) {
 					const query = queryData[index]
-					await new model({ ...query, ...query.args }).save()
+					const m: any = { ...query, ...query.args }
+					event.inputs
+						.filter((elem) => elem.type === "tuple")
+						.forEach((elem) => {
+							let fin: any = {}
+							let temp = (query as any).args[elem.name]
+							Object.keys(temp).forEach((key) => {
+								fin[key] = (query as any).args[elem.name][key]
+							})
+							m[elem.name] = fin
+						})
+					await new model(m).save()
 				}
 				Log.info({ EventCollectionName, block, latestBlock })
 				await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: latestBlock })
