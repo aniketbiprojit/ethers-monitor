@@ -18,6 +18,10 @@ export class ContractFunctions {
 		return ContractModel.findOneAndUpdate({ uid }, { $set: contract }, { upsert: true, new: true })
 	}
 
+	static getContracts() {
+		return ContractModel.find()
+	}
+
 	private static getUid(address: string, chainId: number) {
 		return `${address}-${chainId}`
 	}

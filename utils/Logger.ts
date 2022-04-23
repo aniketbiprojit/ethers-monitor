@@ -19,20 +19,20 @@ export class Log {
 		}
 		console.debug(`[debug]  ` + this.getDate(), fmt, ...additions)
 	}
-	public static info(fmt: any, ...additions: any[]): void {
+	public static info(fmt: any = "", ...additions: any[]): void {
 		if (this.logLevel > LogLevelEnum.info) {
 			return
 		}
 		console.info("\x1b[36m%s\x1b[0m", `[info] `, "\x1b[0m", this.getDate(), fmt, ...additions)
 	}
-	public static warn(fmt: any, ...additions: any[]): void {
+	public static warn(fmt: any = "", ...additions: any[]): void {
 		if (this.logLevel > LogLevelEnum.warn) {
 			return
 		}
 
 		console.warn("\x1b[33m%s\x1b[0m", `[warn] `, "\x1b[0m", this.getDate(), fmt, ...additions)
 	}
-	public static error(fmt: any, ...additions: any[]): void {
+	public static error(fmt: any = "", ...additions: any[]): void {
 		if (this.logLevel > LogLevelEnum.error) {
 			return
 		}

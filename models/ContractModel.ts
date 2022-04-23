@@ -24,6 +24,7 @@ export class ContractRepository {
 	abi: Array<
 		{
 			type: string
+			inputs: Array<{ name: string; type: string; indexed: boolean }>
 		} & Record<string, any>
 	>
 
