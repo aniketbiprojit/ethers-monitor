@@ -16,9 +16,15 @@ export class Sync {
 
 	public static async start() {
 		const contracts = await ContractFunctions.getContracts()
+		let arr: Promise<any>[] = []
+		const limit = 5
 		for (let index = 0; index < contracts.length; index++) {
 			const element = contracts[index]
-			await Sync.indexContract(element)
+			arr.push(Sync.indexContract(element))
+			if (arr.length > limit) {
+				await Promise.all(arr)
+				arr = []
+			}
 		}
 	}
 
@@ -124,7 +130,7 @@ export class Sync {
 		})
 		const collection = new mongoose.Schema(
 			{
-				transactionHash: { type: String, unique: true },
+				transactionHash: { type: String },
 				blockNumber: Number,
 				...r,
 			},

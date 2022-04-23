@@ -27,7 +27,7 @@ class Initialize {
 		new ExpressConfig(port)
 		await Sync.init(filteredAbi)
 
-		cron.schedule("*/5 * * * *", async () => {
+		cron.schedule("* * * * *", async () => {
 			await Sync.start()
 			console.log("running a task every 5 minutes")
 		})
