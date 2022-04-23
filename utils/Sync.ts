@@ -38,27 +38,38 @@ export class Sync {
 			if (event.indexedTill && block < event.indexedTill) {
 				block = event.indexedTill
 			}
+			if (contract.startBlock > block) {
+				block = contract.startBlock
+			}
 			Log.info({ EventCollectionName, block, latestBlock })
 			const batchSize = 2000
 			if (latestBlock - block > batchSize) {
 				let initialBlock = block
-				for (let index = initialBlock; index < (latestBlock - initialBlock) / batchSize; index++) {
-					const queryData = await contractInstance.queryFilter(
-						contractInstance.filters[event.name](),
-						initialBlock,
-						initialBlock + batchSize
-					)
-					for (let index = 0; index < queryData.length; index++) {
-						const query = queryData[index]
-						await model.findOneAndUpdate(
-							{ ...query, ...query.args },
-							{ $set: { ...query, ...query.args } },
-							{ upsert: true, new: true }
+				Log.info(`Started indexing:`, { name: contract.name, uid: contract.uid, event: event.name })
+				while (initialBlock + batchSize < latestBlock) {
+					try {
+						const queryData = await contractInstance.queryFilter(
+							contractInstance.filters[event.name](),
+							initialBlock,
+							initialBlock + batchSize
 						)
+						for (let index = 0; index < queryData.length; index++) {
+							const query = queryData[index]
+							await model.findOneAndUpdate(
+								{ transactionHash: query.transactionHash },
+								{ $set: { ...query, ...query.args } },
+								{ upsert: true, new: true }
+							)
+						}
+						Log.info({ EventCollectionName, initialBlock, latestBlock })
+						initialBlock += batchSize
+
+						await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: initialBlock })
+					} catch (err) {
+						console.error(err)
+						this.indexContract(contract)
+						return
 					}
-					Log.info({ EventCollectionName, block, latestBlock })
-					initialBlock += batchSize
-					await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: initialBlock })
 				}
 			} else {
 				const queryData = await contractInstance.queryFilter(contractInstance.filters[event.name](), block, latestBlock)
@@ -77,6 +88,7 @@ export class Sync {
 	private static getCollection(contract: ContractRepository, index: number) {
 		const event = contract.abi[index]
 		const EventCollectionName = `${contract.uid}-${event.name}`
+
 		const r: any = {}
 		event.inputs.forEach((elem) => {
 			r[elem.name] = String
@@ -91,7 +103,8 @@ export class Sync {
 				collection: EventCollectionName,
 			}
 		)
-		const model = mongoose.model(EventCollectionName, collection, EventCollectionName)
+		let model = mongoose.model(EventCollectionName, collection, EventCollectionName)
+
 		return { collection, model, EventCollectionName, event }
 	}
 

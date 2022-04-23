@@ -2,20 +2,28 @@ import { ContractConfigData } from "../@types/ContractConfigData"
 import { ContractModel, ContractRepository } from "./ContractModel"
 
 export class ContractFunctions {
-	static add(contractData: ContractConfigData) {
+	static async add(contractData: ContractConfigData) {
 		const { address, chainId } = contractData
 		const uid = ContractFunctions.getUid(address, chainId)
 		const contract: ContractRepository = {
 			uid,
 			name: contractData.name,
 			address,
-			abi: contractData.abi,
+			abi: contractData.abi.map((elem) => ({ ...elem, indexedTill: 0 })),
 			chainId,
 			startBlock: contractData.startBlock,
 			rpcURL: contractData.rpcURL,
 			indexedTill: contractData.startBlock,
 		}
-		return ContractModel.findOneAndUpdate({ uid }, { $set: contract }, { upsert: true, new: true })
+		const contractInstance = await ContractModel.findOne({ uid })
+		if (!contractInstance) {
+			return await ContractModel.findOneAndUpdate(
+				{ uid },
+				{ $set: { ...contract, abi: contract.abi } },
+				{ upsert: true, new: true }
+			)
+		}
+		return contractInstance
 	}
 
 	static getContracts() {
@@ -31,8 +39,8 @@ export class ContractFunctions {
 					abis[index].indexedTill = event.indexedTill
 				}
 			}
-			contract.abi = abis
-			await contract.save()
+			await ContractModel.updateOne({ uid }, { $set: { abi: abis } })
+
 			return
 		}
 	}
