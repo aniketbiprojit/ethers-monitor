@@ -108,7 +108,7 @@ export class Sync {
 		}
 	}
 
-	private static getCollection(contract: ContractRepository, index: number) {
+	public static getCollection(contract: ContractRepository, index: number) {
 		const event = contract.abi[index]
 		const EventCollectionName = `${contract.uid}-${event.name}`
 
@@ -124,7 +124,7 @@ export class Sync {
 		})
 		const collection = new mongoose.Schema(
 			{
-				transactionHash: String,
+				transactionHash: { type: String, unique: true },
 				blockNumber: Number,
 				...r,
 			},

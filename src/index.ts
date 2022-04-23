@@ -24,14 +24,13 @@ class Initialize {
 		Log.info(filteredAbi.map((elem) => ({ name: elem.name, chainId: elem.chainId })))
 		const port = (process.env.PORT as string) || 8080
 
+		new ExpressConfig(port)
 		await Sync.init(filteredAbi)
 
-		cron.schedule("* * * * *", async () => {
+		cron.schedule("*/5 * * * *", async () => {
 			await Sync.start()
-			console.log("running a task every minute")
+			console.log("running a task every 5 minutes")
 		})
-
-		new ExpressConfig(port)
 	}
 }
 
