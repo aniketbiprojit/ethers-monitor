@@ -5,6 +5,7 @@ export type ContractConfigData = {
 	address: string
 	abi: Array<{
 		type: string
+		name: string
 		inputs: { name: string; type: string; indexed: boolean }[]
 	}>
 	provider: ethers.providers.Provider

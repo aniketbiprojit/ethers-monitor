@@ -1,8 +1,10 @@
+import { ethers } from "ethers"
 import mongoose from "mongoose"
 import { ContractConfigData } from "../@types/ContractConfigData"
 import { ContractFunctions } from "../models/ContractFunctions"
 import { ContractRepository } from "../models/ContractModel"
 import { Log } from "./Logger"
+import { getProvider } from "./provider"
 
 export class Sync {
 	static contracts: ContractConfigData[]
@@ -21,9 +23,28 @@ export class Sync {
 	}
 
 	private static async indexContract(contract: ContractRepository) {
+		const contractInstance = new ethers.Contract(contract.address, contract.abi, getProvider(contract.rpcURL))
+		const latestBlock = await contractInstance.provider.getBlockNumber()
 		for (let index = 0; index < contract.abi.length; index++) {
-			const { EventCollectionName, event } = Sync.getCollection(contract, index)
+			const { model, EventCollectionName, event } = Sync.getCollection(contract, index)
+			const fetchedData = await model.find().sort({ blockNumber: -1 }).limit(1)
 
+			let block =
+				fetchedData.length > 0
+					? fetchedData[0].blockNumber > contract.startBlock
+						? fetchedData[0].blockNumber
+						: contract.startBlock
+					: contract.startBlock
+			if (event.indexedTill && block < event.indexedTill) {
+				block = event.indexedTill
+			}
+			Log.info({ block, latestBlock })
+			const queryData = await contractInstance.queryFilter(contractInstance.filters[event.name](), block, latestBlock)
+			for (let index = 0; index < queryData.length; index++) {
+				const query = queryData[index]
+				await new model({ ...query, ...query.args }).save()
+			}
+			event.indexedTill = latestBlock
 			Log.debug(EventCollectionName)
 			Log.debug({ Event: event.name, Inputs: event.inputs })
 		}
@@ -36,9 +57,16 @@ export class Sync {
 		event.inputs.forEach((elem) => {
 			r[elem.name] = String
 		})
-		const collection = new mongoose.Schema({
-			...r,
-		})
+		const collection = new mongoose.Schema(
+			{
+				transactionHash: String,
+				blockNumber: Number,
+				...r,
+			},
+			{
+				collection: EventCollectionName,
+			}
+		)
 		const model = mongoose.model(EventCollectionName, collection, EventCollectionName)
 		return { collection, model, EventCollectionName, event }
 	}
@@ -46,8 +74,8 @@ export class Sync {
 	private static async addContracts(contracts: ContractConfigData[]) {
 		for (let index = 0; index < contracts.length; index++) {
 			const contract = await ContractFunctions.add(contracts[index])
-			Log.info(`\n\nAdding: `, { name: contract.name, uid: contract.uid })
-			Log.info("Events found:")
+			console.log()
+			Log.info(`Added:`, { name: contract.name, uid: contract.uid })
 		}
 	}
 }

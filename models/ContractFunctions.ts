@@ -22,6 +22,21 @@ export class ContractFunctions {
 		return ContractModel.find()
 	}
 
+	static async updateEvent(uid: string, event: { name: string; indexedTill: number }) {
+		const contract = await ContractModel.findOne({ uid })
+		if (contract) {
+			let abis = contract.abi
+			for (let index = 0; index < abis.length; index++) {
+				if (abis[index]?.name === event.name) {
+					abis[index].indexedTill = event.indexedTill
+				}
+			}
+			contract.abi = abis
+			await contract.save()
+			return
+		}
+	}
+
 	private static getUid(address: string, chainId: number) {
 		return `${address}-${chainId}`
 	}
