@@ -51,7 +51,6 @@ export class ExpressConfig {
 					const eventABI = contractInstance.abi.filter((elem) => {
 						return elem.name === event?.name
 					})
-					console.log(eventABI, event?.name, contractInstance.abi)
 					if (eventABI.length > 0) {
 						const { model } = Sync.getCollection(contractInstance, contractInstance.abi.indexOf(eventABI[0]))
 						res.send((await model.find(query)).map((elem) => elem.toJSON()))
