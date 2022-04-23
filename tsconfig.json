@@ -24,9 +24,10 @@
 		"baseUrl": "src"
 	},
 	"exclude": ["node_modules"],
-	"include": ["./src", "./abi", "./contracts/*.json", "./config.json", "loadEnv.ts"],
+	"include": ["./src", "./abi", "./contracts/*.json", "./models", "./config.json", "loadEnv.ts"],
 	"paths": {
 		"@src/*": ["src/*"],
+		"@models/*": ["models/*"],
 		"@contracts/*": ["contracts/*"]
 	}
 }

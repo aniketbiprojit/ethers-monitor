@@ -31,6 +31,7 @@ export const getListOfContracts = async (contractsDir: string) => {
 						completePath = join(__dirname, "..", "..", contractsDir, elem)
 					}
 					const importedData = (await import(completePath)).default
+					importedData.address = ethers.utils.getAddress(importedData.address)
 					if (importedData?.name === undefined) {
 						importedData.name = elem.replace(".json", "")
 					}

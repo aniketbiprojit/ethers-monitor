@@ -10,8 +10,10 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@typegoose/typegoose": "^9.8.1",
 		"dotenv": "^16.0.0",
-		"ethers": "^5.6.4"
+		"ethers": "^5.6.4",
+		"mongoose": "~6.3.0"
 	},
 	"devDependencies": {
 		"@types/dotenv": "^8.2.0",
