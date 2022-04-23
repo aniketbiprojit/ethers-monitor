@@ -13,6 +13,7 @@ type ContractConfigData = {
 	>
 	provider: ethers.providers.Provider
 	chainId: number
+	startBlock: number
 }
 
 export const getListOfContracts = async (contractsDir: string) => {
@@ -50,13 +51,25 @@ export const getListOfContracts = async (contractsDir: string) => {
 							console.error("Failed to load chain id for contract(custom provider): " + importedData.name)
 						}
 					}
+					if (importedData.startBlock) {
+						try {
+							importedData.startBlock = parseInt(importedData?.startBlock?.toString())
+						} catch (err) {
+							console.error("Failed to parse startBlock")
+							importedData.startBlock = 0
+						}
+					} else {
+						importedData.startBlock = 0
+					}
 					return importedData
 				})
 		)
-	).filter(async (elem) => {
-		const keys = Object.keys(elem)
-		return keys.includes("abi") && keys.includes("address")
-	}) as ContractConfigData[]
+	)
+		.filter((elem) => {
+			const keys = Object.keys(elem)
+			return keys.includes("abi") && keys.includes("address")
+		})
+		.filter((elem) => elem.chainId !== undefined) as ContractConfigData[]
 }
 export const filterABIForEvents = (contracts: ContractConfigData[]) => {
 	return contracts.map((elem) => {
