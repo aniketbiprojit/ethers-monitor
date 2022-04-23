@@ -27,7 +27,7 @@ class Initialize {
 		new ExpressConfig(port)
 		await Sync.init(filteredAbi)
 
-		cron.schedule("* * * * *", async () => {
+		cron.schedule(process.env.CRON_SCHEDULE || "*/10 * * * *", async () => {
 			await Sync.start()
 			console.log("running a task")
 		})
