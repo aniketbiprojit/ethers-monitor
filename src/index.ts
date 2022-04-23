@@ -29,7 +29,7 @@ class Initialize {
 
 		cron.schedule("* * * * *", async () => {
 			await Sync.start()
-			console.log("running a task every 5 minutes")
+			console.log("running a task")
 		})
 	}
 }
