@@ -5,6 +5,7 @@ import { getListOfContracts, filterABIForEvents } from "../utils/contracts"
 import { getConfig } from "../utils/getConfig"
 import { MongoContainer } from "../utils/mongo"
 import { ExpressConfig } from "../app/ExpressConfig"
+import { Sync } from "../utils/Sync"
 
 class Initialize {
 	static async init() {
@@ -21,6 +22,9 @@ class Initialize {
 
 		Log.info(filteredAbi.map((elem) => ({ name: elem.name, chainId: elem.chainId })))
 		const port = (process.env.PORT as string) || 8080
+
+		await Sync.init(filteredAbi)
+
 		new ExpressConfig(port)
 	}
 }

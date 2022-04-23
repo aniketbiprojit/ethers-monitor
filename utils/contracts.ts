@@ -1,21 +1,9 @@
 import { ethers } from "ethers"
 import { readdirSync } from "fs"
 import { isAbsolute, join } from "path"
+import { ContractConfigData } from "../@types/ContractConfigData"
 import { Log } from "./Logger"
 import { getChainId, getProvider, ProviderContainer } from "./provider"
-
-type ContractConfigData = {
-	name: string
-	address: string
-	abi: Array<
-		{
-			type: string
-		} & Record<string, any>
-	>
-	provider: ethers.providers.Provider
-	chainId: number
-	startBlock: number
-}
 
 export const getListOfContracts = async (contractsDir: string) => {
 	return (

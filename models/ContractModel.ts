@@ -11,26 +11,26 @@ import { getModelForClass, modelOptions, prop, Severity } from "@typegoose/typeg
 })
 export class ContractRepository {
 	// uid => `{address}-{chainId}`
-	@prop()
+	@prop({ unique: true, required: true })
 	uid: string
 
-	@prop()
+	@prop({ required: true })
 	name: string
 
-	@prop()
+	@prop({ required: true })
 	address: string
 
-	@prop()
+	@prop({ required: true })
 	abi: Array<
 		{
 			type: string
 		} & Record<string, any>
 	>
 
-	@prop()
+	@prop({ required: true })
 	chainId: number
 
-	@prop()
+	@prop({ default: 0 })
 	startBlock: number
 
 	@prop()
