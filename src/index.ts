@@ -6,6 +6,7 @@ import { getConfig } from "../utils/getConfig"
 import { MongoContainer } from "../utils/mongo"
 import { ExpressConfig } from "../app/ExpressConfig"
 import { Sync } from "../utils/Sync"
+import cron from "node-cron"
 
 class Initialize {
 	static async init() {
@@ -24,6 +25,11 @@ class Initialize {
 		const port = (process.env.PORT as string) || 8080
 
 		await Sync.init(filteredAbi)
+
+		cron.schedule("* * * * *", async () => {
+			await Sync.start()
+			console.log("running a task every minute")
+		})
 
 		new ExpressConfig(port)
 	}

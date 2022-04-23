@@ -14,7 +14,7 @@ export class Sync {
 		await Sync.start()
 	}
 
-	private static async start() {
+	public static async start() {
 		const contracts = await ContractFunctions.getContracts()
 		for (let index = 0; index < contracts.length; index++) {
 			const element = contracts[index]
@@ -38,13 +38,37 @@ export class Sync {
 			if (event.indexedTill && block < event.indexedTill) {
 				block = event.indexedTill
 			}
-			Log.info({ block, latestBlock })
-			const queryData = await contractInstance.queryFilter(contractInstance.filters[event.name](), block, latestBlock)
-			for (let index = 0; index < queryData.length; index++) {
-				const query = queryData[index]
-				await new model({ ...query, ...query.args }).save()
+			Log.info({ EventCollectionName, block, latestBlock })
+			const batchSize = 2000
+			if (latestBlock - block > batchSize) {
+				let initialBlock = block
+				for (let index = initialBlock; index < (latestBlock - initialBlock) / batchSize; index++) {
+					const queryData = await contractInstance.queryFilter(
+						contractInstance.filters[event.name](),
+						initialBlock,
+						initialBlock + batchSize
+					)
+					for (let index = 0; index < queryData.length; index++) {
+						const query = queryData[index]
+						await model.findOneAndUpdate(
+							{ ...query, ...query.args },
+							{ $set: { ...query, ...query.args } },
+							{ upsert: true, new: true }
+						)
+					}
+					Log.info({ EventCollectionName, block, latestBlock })
+					initialBlock += batchSize
+					await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: initialBlock })
+				}
+			} else {
+				const queryData = await contractInstance.queryFilter(contractInstance.filters[event.name](), block, latestBlock)
+				for (let index = 0; index < queryData.length; index++) {
+					const query = queryData[index]
+					await new model({ ...query, ...query.args }).save()
+				}
+				Log.info({ EventCollectionName, block, latestBlock })
+				await ContractFunctions.updateEvent(contract.uid, { ...event, indexedTill: latestBlock })
 			}
-			event.indexedTill = latestBlock
 			Log.debug(EventCollectionName)
 			Log.debug({ Event: event.name, Inputs: event.inputs })
 		}
