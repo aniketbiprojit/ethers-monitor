@@ -41,6 +41,7 @@ export const getListOfContracts = async (contractsDir: string) => {
 							Log.error("Failed to load chain id for contract(custom provider): " + importedData.name)
 						}
 					}
+					importedData.rpcURL = importedData?.provider?.connection?.url || "" // importedData.provider as ethers.providers.Provider
 					if (importedData.startBlock) {
 						try {
 							importedData.startBlock = parseInt(importedData?.startBlock?.toString())

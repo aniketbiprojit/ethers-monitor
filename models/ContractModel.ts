@@ -35,6 +35,9 @@ export class ContractRepository {
 
 	@prop()
 	indexedTill: number
+
+	@prop({ required: true })
+	rpcURL: string
 }
 
 export const ContractModel = getModelForClass(ContractRepository)

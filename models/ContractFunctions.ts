@@ -12,6 +12,7 @@ export class ContractFunctions {
 			abi: contractData.abi,
 			chainId,
 			startBlock: contractData.startBlock,
+			rpcURL: contractData.rpcURL,
 			indexedTill: contractData.startBlock,
 		}
 		return ContractModel.findOneAndUpdate({ uid }, { $set: contract }, { upsert: true, new: true })

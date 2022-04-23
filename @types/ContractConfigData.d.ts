@@ -11,4 +11,5 @@ export type ContractConfigData = {
 	provider: ethers.providers.Provider
 	chainId: number
 	startBlock: number
+	rpcURL: string
 }
