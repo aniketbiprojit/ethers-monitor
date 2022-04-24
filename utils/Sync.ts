@@ -8,19 +8,24 @@ import { getProvider } from "./provider"
 
 export class Sync {
 	static contracts: ContractConfigData[]
+	static initialSync: boolean = false
 	static async init(contracts: ContractConfigData[]) {
-		Sync.contracts = contracts
-		await Sync.addContracts(contracts)
-		await Sync.start()
+		this.contracts = contracts
+		await this.addContracts(contracts)
+		await this.start(true)
+		this.initialSync = true
 	}
 
-	public static async start() {
+	public static async start(willStart = this.initialSync) {
+		if (willStart === false) {
+			return
+		}
 		const contracts = await ContractFunctions.getContracts()
 		let arr: Promise<any>[] = []
 		const limit = 5
 		for (let index = 0; index < contracts.length; index++) {
 			const element = contracts[index]
-			arr.push(Sync.indexContract(element))
+			arr.push(this.indexContract(element))
 			if (arr.length > limit) {
 				await Promise.all(arr)
 				arr = []
@@ -32,7 +37,7 @@ export class Sync {
 		const contractInstance = new ethers.Contract(contract.address, contract.abi, getProvider(contract.rpcURL))
 		const latestBlock = _latestBlock || (await contractInstance.provider.getBlockNumber())
 		for (let index = 0; index < contract.abi.length; index++) {
-			const { model, EventCollectionName, event } = Sync.getCollection(contract, index)
+			const { model, EventCollectionName, event } = this.getCollection(contract, index)
 			const fetchedData = await model.find().sort({ blockNumber: -1 }).limit(1)
 
 			let block =
