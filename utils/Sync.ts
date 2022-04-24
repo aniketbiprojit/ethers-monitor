@@ -72,6 +72,7 @@ export class Sync {
 						for (let index = 0; index < queryData.length; index++) {
 							const query = queryData[index]
 							const m: any = { ...query, ...query.args }
+							Log.error(query)
 							event.inputs
 								.filter((elem) => elem.type === "tuple")
 								.forEach((elem) => {
@@ -85,13 +86,12 @@ export class Sync {
 									})
 									m[elem.name] = fin
 								})
-							// event.inputs
-							// 	.filter((elem) => elem.indexed === true)
-							// 	.forEach((elem) => {
-							// 		let temp = (query as any).args[elem.name]
-							// 		m[elem.name] = temp.hash
-							// 	})
-
+							event.inputs
+								.filter((elem) => elem.indexed === true)
+								.forEach((elem) => {
+									let temp = (query as any).args[elem.name]
+									if (temp.hash) m[elem.name] = temp.hash
+								})
 							await model.findOneAndUpdate(
 								{ transactionHash: query.transactionHash },
 								{ $set: m },
@@ -126,12 +126,12 @@ export class Sync {
 							})
 							m[elem.name] = fin
 						})
-					// event.inputs
-					// 	.filter((elem) => elem.indexed === true)
-					// 	.forEach((elem) => {
-					// 		let temp = (query as any).args[elem.name]
-					// 		m[elem.name] = temp.hash
-					// 	})
+					event.inputs
+						.filter((elem) => elem.indexed === true)
+						.forEach((elem) => {
+							let temp = (query as any).args[elem.name]
+							if (temp.hash) m[elem.name] = temp.hash
+						})
 					await new model(m).save()
 				}
 				Log.info({ EventCollectionName, block, latestBlock })
