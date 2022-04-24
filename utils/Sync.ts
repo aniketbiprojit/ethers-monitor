@@ -56,7 +56,11 @@ export class Sync {
 			const batchSize = 2_000
 			if (latestBlock - block > batchSize) {
 				let initialBlock = block
-				Log.info(`Started indexing:`, { name: contract.name, uid: contract.uid, event: event.name })
+				Log.info(`Started indexing ${initialBlock}, ${latestBlock}:`, {
+					name: contract.name,
+					uid: contract.uid,
+					event: event.name,
+				})
 
 				while (initialBlock + batchSize < latestBlock) {
 					try {
@@ -75,9 +79,19 @@ export class Sync {
 									let temp = (query as any).args[elem.name]
 									Object.keys(temp).forEach((key) => {
 										fin[key] = (query as any).args[elem.name][key]
+										if (temp.indexed === true) {
+											fin[key] = (query as any).args[elem.name][key].hash
+										}
 									})
 									m[elem.name] = fin
 								})
+							event.inputs
+								.filter((elem) => elem.indexed === true)
+								.forEach((elem) => {
+									let temp = (query as any).args[elem.name]
+									m[elem.name] = temp.hash
+								})
+
 							await model.findOneAndUpdate(
 								{ transactionHash: query.transactionHash },
 								{ $set: m },
@@ -106,8 +120,17 @@ export class Sync {
 							let temp = (query as any).args[elem.name]
 							Object.keys(temp).forEach((key) => {
 								fin[key] = (query as any).args[elem.name][key]
+								if (temp.indexed === true) {
+									fin[key] = (query as any).args[elem.name][key].hash
+								}
 							})
 							m[elem.name] = fin
+						})
+					event.inputs
+						.filter((elem) => elem.indexed === true)
+						.forEach((elem) => {
+							let temp = (query as any).args[elem.name]
+							m[elem.name] = temp.hash
 						})
 					await new model(m).save()
 				}
