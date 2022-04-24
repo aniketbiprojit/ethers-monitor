@@ -7,6 +7,7 @@ import { MongoContainer } from "../utils/mongo"
 import { ExpressConfig } from "../app/ExpressConfig"
 import { Sync } from "../utils/Sync"
 import cron from "node-cron"
+import { ProviderContainer } from "../utils/provider"
 
 class Initialize {
 	static async init() {
