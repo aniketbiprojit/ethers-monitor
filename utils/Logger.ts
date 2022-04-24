@@ -37,6 +37,6 @@ export class Log {
 			return
 		}
 
-		Log.error("\x1b[31m%s\x1b[0m", `[error] ` + " " + this.getDate() + " ", fmt, "\x1b[0m", ...additions)
+		console.error("\x1b[31m%s\x1b[0m", `[error] ` + " " + this.getDate() + " ", fmt, "\x1b[0m", ...additions)
 	}
 }

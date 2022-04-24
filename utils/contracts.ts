@@ -67,6 +67,23 @@ export const filterABIForEvents = (contracts: ContractConfigData[]) => {
 		elem.abi = elem.abi.filter((abiElem) => {
 			return abiElem.type === "event"
 		})
+		elem.abi.map(abi => {
+			abi.inputs = abi.inputs.map((input, idx) => {
+				if (input.name === '') {
+					input.name = input.type + '_' + idx
+				}
+				if (input.type === 'tuple' && input.components) {
+					input.components = input.components.map((component, idx) => {
+						if (component.name === '') {
+							component.name = component.type + '_' + idx
+						}
+						return component
+					})
+				}
+				return input
+			})
+
+		})
 		return elem
 	})
 }

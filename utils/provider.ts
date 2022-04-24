@@ -4,7 +4,7 @@ export class ProviderContainer {
 	private static _defaultProvider: ethers.providers.Provider
 	public static get defaultProvider(): ethers.providers.Provider {
 		if (!this._defaultProvider) {
-			this._defaultProvider = new ethers.providers.JsonRpcProvider(process.env.DEFAULT_RPC_PROVIDER)
+			this._defaultProvider = new ethers.providers.JsonRpcProvider('https://speedy-nodes-nyc.moralis.io/34739a5bf4f27241c9deddc2/eth/mainnet')
 		}
 		return this._defaultProvider
 	}

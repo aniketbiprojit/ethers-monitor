@@ -48,7 +48,7 @@ export class Sync {
 				block = contract.startBlock
 			}
 			Log.info({ name: contract.name, EventCollectionName, block, latestBlock })
-			const batchSize = 10_000
+			const batchSize = 2_000
 			if (latestBlock - block > batchSize) {
 				let initialBlock = block
 				Log.info(`Started indexing:`, { name: contract.name, uid: contract.uid, event: event.name })
