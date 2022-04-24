@@ -1,4 +1,5 @@
 import { ethers } from "ethers"
+import { Indexed } from "ethers/lib/utils"
 import mongoose from "mongoose"
 import { ContractConfigData } from "../@types/ContractConfigData"
 import { ContractFunctions } from "../models/ContractFunctions"
@@ -72,7 +73,6 @@ export class Sync {
 						for (let index = 0; index < queryData.length; index++) {
 							const query = queryData[index]
 							const m: any = { ...query, ...query.args }
-							Log.error(query)
 							event.inputs
 								.filter((elem) => elem.type === "tuple")
 								.forEach((elem) => {
@@ -80,9 +80,9 @@ export class Sync {
 									let temp = (query as any).args[elem.name]
 									Object.keys(temp).forEach((key) => {
 										fin[key] = (query as any).args[elem.name][key]
-										// if (temp.indexed === true) {
-										// 	fin[key] = (query as any).args[elem.name][key].hash
-										// }
+										if (temp.indexed === true && temp instanceof Indexed) {
+											fin[key] = (query as any).args[elem.name][key].hash
+										}
 									})
 									m[elem.name] = fin
 								})
@@ -90,7 +90,7 @@ export class Sync {
 								.filter((elem) => elem.indexed === true)
 								.forEach((elem) => {
 									let temp = (query as any).args[elem.name]
-									if (temp.hash) m[elem.name] = temp.hash
+									if (temp instanceof Indexed) m[elem.name] = temp.hash
 								})
 							await model.findOneAndUpdate(
 								{ transactionHash: query.transactionHash },
@@ -120,9 +120,9 @@ export class Sync {
 							let temp = (query as any).args[elem.name]
 							Object.keys(temp).forEach((key) => {
 								fin[key] = (query as any).args[elem.name][key]
-								// if (temp.indexed === true) {
-								// 	fin[key] = (query as any).args[elem.name][key].hash
-								// }
+								if (temp.indexed === true && temp instanceof Indexed) {
+									fin[key] = (query as any).args[elem.name][key].hash
+								}
 							})
 							m[elem.name] = fin
 						})
@@ -130,7 +130,7 @@ export class Sync {
 						.filter((elem) => elem.indexed === true)
 						.forEach((elem) => {
 							let temp = (query as any).args[elem.name]
-							if (temp.hash) m[elem.name] = temp.hash
+							if (temp instanceof Indexed) m[elem.name] = temp.hash
 						})
 					await new model(m).save()
 				}
