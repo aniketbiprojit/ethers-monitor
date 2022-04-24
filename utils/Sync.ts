@@ -79,18 +79,18 @@ export class Sync {
 									let temp = (query as any).args[elem.name]
 									Object.keys(temp).forEach((key) => {
 										fin[key] = (query as any).args[elem.name][key]
-										if (temp.indexed === true) {
-											fin[key] = (query as any).args[elem.name][key].hash
-										}
+										// if (temp.indexed === true) {
+										// 	fin[key] = (query as any).args[elem.name][key].hash
+										// }
 									})
 									m[elem.name] = fin
 								})
-							event.inputs
-								.filter((elem) => elem.indexed === true)
-								.forEach((elem) => {
-									let temp = (query as any).args[elem.name]
-									m[elem.name] = temp.hash
-								})
+							// event.inputs
+							// 	.filter((elem) => elem.indexed === true)
+							// 	.forEach((elem) => {
+							// 		let temp = (query as any).args[elem.name]
+							// 		m[elem.name] = temp.hash
+							// 	})
 
 							await model.findOneAndUpdate(
 								{ transactionHash: query.transactionHash },
@@ -120,18 +120,18 @@ export class Sync {
 							let temp = (query as any).args[elem.name]
 							Object.keys(temp).forEach((key) => {
 								fin[key] = (query as any).args[elem.name][key]
-								if (temp.indexed === true) {
-									fin[key] = (query as any).args[elem.name][key].hash
-								}
+								// if (temp.indexed === true) {
+								// 	fin[key] = (query as any).args[elem.name][key].hash
+								// }
 							})
 							m[elem.name] = fin
 						})
-					event.inputs
-						.filter((elem) => elem.indexed === true)
-						.forEach((elem) => {
-							let temp = (query as any).args[elem.name]
-							m[elem.name] = temp.hash
-						})
+					// event.inputs
+					// 	.filter((elem) => elem.indexed === true)
+					// 	.forEach((elem) => {
+					// 		let temp = (query as any).args[elem.name]
+					// 		m[elem.name] = temp.hash
+					// 	})
 					await new model(m).save()
 				}
 				Log.info({ EventCollectionName, block, latestBlock })
